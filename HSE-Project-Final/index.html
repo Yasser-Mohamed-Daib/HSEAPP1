@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="نظام إدارة السلامة المهنية للشركة العالمية للانتاج والتصنيع الزراعي - HSE Management System">
+    <meta name="keywords" content="السلامة المهنية, HSE, الصناعات الغذائية, حوادث العمل, تصاريح العمل">
+    <meta name="author" content="HSE Team">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="HSE Management System - نظام السلامة المهنية">
+    <meta property="og:description" content="نظام إدارة السلامة المهنية للشركة العالمية للانتاج والتصنيع الزراعي">
+    
+    <title>HSE Management System - نظام السلامة المهنية</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Tailwind CSS -->
+    <!-- Note: Using CDN for development. For production, install Tailwind as PostCSS plugin -->
+    <!-- Production: npm install -D tailwindcss postcss autoprefixer && npx tailwindcss init -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Suppress Tailwind CDN production warning and other console messages
+        (function() {
+            const originalWarn = console.warn;
+            const originalError = console.error;
+            const originalLog = console.log;
+            const originalInfo = console.info;
+            
+            const suppressedMessages = [
+                'cdn.tailwindcss.com',
+                'should not be used in production',
+                'Tailwind CSS',
+                'PostCSS plugin',
+                'Tailwind CLI',
+                'runtime.lastError',
+                'Could not establish connection',
+                'Receiving end does not exist'
+            ];
+            
+            const shouldSuppress = (message) => {
+                if (typeof message !== 'string') return false;
+                return suppressedMessages.some(suppressed => message.includes(suppressed));
+            };
+            
+            console.warn = function(...args) {
+                if (args.length > 0 && shouldSuppress(args[0])) {
+                    return; // تجاهل التحذيرات
+                }
+                originalWarn.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                if (args.length > 0 && shouldSuppress(args[0])) {
+                    return; // تجاهل الأخطاء
+                }
+                originalError.apply(console, args);
+            };
+            
+            console.log = function(...args) {
+                if (args.length > 0 && shouldSuppress(args[0])) {
+                    return; // تجاهل الرسائل
+                }
+                originalLog.apply(console, args);
+            };
+            
+            console.info = function(...args) {
+                if (args.length > 0 && shouldSuppress(args[0])) {
+                    return; // تجاهل المعلومات
+                }
+                originalInfo.apply(console, args);
+            };
+        })();
+    </script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- i18n Translations -->
+    <script src="locales.js"></script>
+    
+    <!-- SheetJS for Excel import -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- jsPDF for PDF export (optional, using HTML print instead) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- QR Code Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Utility Functions -->
+    <script src="utils.js"></script>
+</head>
+<body class="font-cairo bg-gray-50" data-theme="light">
+    
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen" role="main" aria-label="شاشة تسجيل الدخول">
+        <div class="login-container">
+            <div class="login-card" role="article">
+                <!-- Logo -->
+                <header class="text-center mb-8">
+                    <div class="logo-wrapper mb-4" aria-hidden="true">
+                        <img id="company-logo" src="" alt="شعار الشركة" style="max-width: 150px; max-height: 100px; display: none; margin: 0 auto; border-radius: 8px;">
+                        <i id="default-logo-icon" class="fas fa-shield-alt text-6xl text-blue-600"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2" id="login-title">نظام إدارة السلامة والصحة المهنية</h1>
+                    <p class="text-sm font-semibold text-blue-600 mt-1">Americana HSE Management System</p>
+                </header>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-envelope ml-2"></i>
+                            البريد الإلكتروني
+                        </label>
+                        <input 
+                            type="email" 
+                            id="username" 
+                            name="username" 
+                            required
+                            class="form-input"
+                            placeholder="example@americana.com"
+                            autocomplete="username"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-lock ml-2"></i>
+                            كلمة المرور
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required
+                                class="form-input"
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                            >
+                            <button 
+                                type="button" 
+                                id="password-toggle-btn"
+                                class="password-toggle-btn"
+                                aria-label="إظهار/إخفاء كلمة المرور"
+                                title="إظهار/إخفاء كلمة المرور"
+                            >
+                                <i class="fas fa-eye" id="password-toggle-icon" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="remember" id="remember-me" class="rounded border-gray-300 text-blue-600" aria-label="تذكرني">
+                            <span class="mr-2 text-sm text-gray-700">تذكرني</span>
+                        </label>
+                        <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:text-blue-800" aria-label="نسيت كلمة المرور">نسيت كلمة المرور؟</a>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full" aria-label="تسجيل الدخول">
+                        <i class="fas fa-sign-in-alt ml-2" aria-hidden="true"></i>
+                        تسجيل الدخول
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="main-app" style="display: none;">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" role="complementary" aria-label="القائمة الجانبية">
+            <!-- User Profile -->
+            <div class="user-profile" role="region" aria-label="معلومات المستخدم">
+                <div class="user-avatar" aria-hidden="true" style="position: relative; overflow: hidden;">
+                    <img id="user-profile-photo" src="" alt="صورة المستخدم" style="width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 50%;">
+                    <i id="user-profile-icon" class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <h3 class="user-name" id="userDisplayName">المستخدم</h3>
+                    <p class="user-email" id="adminEmail">user@example.com</p>
+                </div>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button id="theme-toggle" class="theme-toggle" aria-label="تبديل الوضع الليلي" title="تبديل الوضع الليلي">
+                <i class="fas fa-moon" id="theme-icon"></i>
+                <span id="theme-text" style="display: none;">الوضع الليلي</span>
+            </button>
+
+            <!-- Notifications Badge -->
+            <button id="notifications-btn" class="notifications-btn" aria-label="الإشعارات" title="الإشعارات">
+                <i class="fas fa-bell"></i>
+                <span id="notifications-badge" class="notifications-badge" style="display: none;">0</span>
+            </button>
+
+            <!-- Language Switcher -->
+            <div class="language-switcher mb-4 p-3 bg-gray-100 rounded-lg">
+                <button id="language-toggle" class="w-full flex items-center justify-between p-2 hover:bg-gray-200 rounded transition-colors">
+                    <span class="flex items-center gap-2">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang-text">العربية</span>
+                    </span>
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="navigation" role="navigation" aria-label="القائمة الرئيسية">
+                <a href="#dashboard" class="nav-item active" data-section="dashboard" role="menuitem" aria-current="page">
+                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    <span data-i18n="nav.dashboard">لوحة التحكم</span>
+                </a>
+                <a href="#users" class="nav-item" data-section="users" role="menuitem">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                    <span data-i18n="nav.users">المستخدمين</span>
+                </a>
+                <a href="#employees" class="nav-item" data-section="employees" role="menuitem">
+                    <i class="fas fa-user-tie" aria-hidden="true"></i>
+                    <span data-i18n="nav.employees">قاعدة بيانات الموظفين</span>
+                </a>
+                <a href="#incidents" class="nav-item" data-section="incidents" role="menuitem">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    <span data-i18n="nav.incidents">الحوادث</span>
+                </a>
+                <a href="#nearmiss" class="nav-item" data-section="nearmiss" role="menuitem">
+                    <i class="fas fa-eye" aria-hidden="true"></i>
+                    <span data-i18n="nav.nearmiss">الحوادث الوشيكة</span>
+                </a>
+                <a href="#ptw" class="nav-item" data-section="ptw" role="menuitem">
+                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                    <span data-i18n="nav.ptw">تصاريح العمل</span>
+                </a>
+                <a href="#training" class="nav-item" data-section="training" role="menuitem">
+                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    <span data-i18n="nav.training">التدريب</span>
+                </a>
+                <a href="#clinic" class="nav-item" data-section="clinic" role="menuitem">
+                    <i class="fas fa-hospital" aria-hidden="true"></i>
+                    <span data-i18n="nav.clinic">العيادة الطبية</span>
+                </a>
+                <a href="#fire-equipment" class="nav-item" data-section="fire-equipment" role="menuitem">
+                    <i class="fas fa-fire-extinguisher" aria-hidden="true"></i>
+                    <span data-i18n="nav.fire">فحص معدات الحريق</span>
+                </a>
+                <a href="#ppe" class="nav-item" data-section="ppe" role="menuitem">
+                    <i class="fas fa-hard-hat" aria-hidden="true"></i>
+                    <span data-i18n="nav.ppe">مهمات الوقاية</span>
+                </a>
+                <a href="#violations" class="nav-item" data-section="violations" role="menuitem">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                    <span data-i18n="nav.violations">المخالفات</span>
+                </a>
+                <a href="#contractors" class="nav-item" data-section="contractors" role="menuitem">
+                    <i class="fas fa-users-cog" aria-hidden="true"></i>
+                    <span data-i18n="nav.contractors">المقاولين</span>
+                </a>
+                <a href="#behavior-monitoring" class="nav-item" data-section="behavior-monitoring" role="menuitem">
+                    <i class="fas fa-user-check" aria-hidden="true"></i>
+                    <span data-i18n="nav.behavior">مراقبة التصرفات</span>
+                </a>
+                <a href="#chemical-safety" class="nav-item" data-section="chemical-safety" role="menuitem">
+                    <i class="fas fa-flask" aria-hidden="true"></i>
+                    <span data-i18n="nav.chemical">المواد الكيميائية</span>
+                </a>
+                <a href="#daily-observations" class="nav-item" data-section="daily-observations" role="menuitem">
+                    <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                    <span data-i18n="nav.observations">الملاحظات اليومية</span>
+                </a>
+                <a href="#iso" class="nav-item" data-section="iso" role="menuitem">
+                    <i class="fas fa-certificate" aria-hidden="true"></i>
+                    <span data-i18n="nav.iso">نظام ISO</span>
+                </a>
+                <a href="#emergency" class="nav-item" data-section="emergency" role="menuitem">
+                    <i class="fas fa-bell" aria-hidden="true"></i>
+                    <span data-i18n="nav.emergency">تنبيهات الطوارئ</span>
+                </a>
+                <a href="#risk-assessment" class="nav-item" data-section="risk-assessment" role="menuitem">
+                    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                    <span data-i18n="nav.risk">تقييم المخاطر</span>
+                </a>
+                <a href="#sop-jha" class="nav-item" data-section="sop-jha" role="menuitem">
+                    <i class="fas fa-file-contract" aria-hidden="true"></i>
+                    <span data-i18n="nav.sop">تعليمات السلامة SOP-JHA</span>
+                </a>
+                <a href="#legal-documents" class="nav-item" data-section="legal-documents" role="menuitem">
+                    <i class="fas fa-gavel" aria-hidden="true"></i>
+                    <span>المستندات القانونية</span>
+                </a>
+                <a href="#sustainability" class="nav-item" data-section="sustainability" role="menuitem">
+                    <i class="fas fa-leaf" aria-hidden="true"></i>
+                    <span>الاستدامة البيئية</span>
+                </a>
+                <a href="#action-tracking" class="nav-item" data-section="action-tracking" role="menuitem">
+                    <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                    <span>سجل متابعة الإجراءات</span>
+                </a>
+                <a href="#half-yearly-statistics" class="nav-item" data-section="half-yearly-statistics" role="menuitem">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span>الاحصائيات النصف سنوية</span>
+                </a>
+                <a href="#ai-assistant" class="nav-item" data-section="ai-assistant" role="menuitem">
+                    <i class="fas fa-robot" aria-hidden="true"></i>
+                    <span>مساعد الذكاء الاصطناعي</span>
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings" role="menuitem">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    <span data-i18n="nav.settings">الإعدادات</span>
+                </a>
+            </nav>
+
+            <!-- Logout Button -->
+            <button id="logout-btn" class="logout-btn" aria-label="تسجيل الخروج">
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                <span data-i18n="nav.logout">تسجيل الخروج</span>
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Company Logo Header -->
+            <div id="company-logo-header" class="company-logo-header" style="display: none; position: fixed; top: 0; right: 250px; left: 0; height: 70px; background: var(--card-bg); border-bottom: 2px solid var(--border-color); z-index: 40; padding: 10px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; transition: background-color 0.3s ease;">
+                <img id="header-company-logo" src="" alt="شعار الشركة" style="max-height: 50px; max-width: 150px; object-fit: contain; display: none;">
+                <div style="flex: 1;"></div>
+                <!-- Header Actions: Theme Toggle & Notifications -->
+                <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
+                    <button id="header-theme-toggle" class="header-theme-toggle" aria-label="تبديل الوضع الليلي" title="تبديل الوضع الليلي" style="display: none;">
+                        <i class="fas fa-moon" id="header-theme-icon"></i>
+                    </button>
+                    <button id="header-notifications-btn" class="header-notifications-btn" aria-label="الإشعارات" title="الإشعارات" style="display: none; position: relative;">
+                        <i class="fas fa-bell"></i>
+                        <span id="header-notifications-badge" class="header-notifications-badge" style="display: none;">0</span>
+                    </button>
+                </div>
+            </div>
+            
+                <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active" role="region" aria-labelledby="dashboard-title">
+                <header class="section-header">
+                    <h1 id="dashboard-title" class="section-title">
+                        <i class="fas fa-tachometer-alt ml-3" aria-hidden="true"></i>
+                        لوحة التحكم
+                    </h1>
+                    <p class="section-subtitle">نظرة عامة على أنشطة السلامة المهنية</p>
+                </header>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid" role="group" aria-label="مؤشرات الأداء الرئيسية">
+                    <div class="kpi-card kpi-primary" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">إجمالي الحوادث</h3>
+                            <p class="kpi-value" id="total-incidents" aria-live="polite">0</p>
+                            <p class="kpi-description">هذا الشهر</p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-success" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">المستخدمين النشطين</h3>
+                            <p class="kpi-value" id="active-users" aria-live="polite">0</p>
+                            <p class="kpi-description">مستخدم مسجل</p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-warning" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">تصاريح العمل</h3>
+                            <p class="kpi-value" id="active-ptw" aria-live="polite">0</p>
+                            <p class="kpi-description">تصريح نشط</p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-info" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">معدل الامتثال</h3>
+                            <p class="kpi-value" id="compliance-rate" aria-live="polite">0%</p>
+                            <p class="kpi-description">شهري</p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-success" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">عدد ساعات العمل</h3>
+                            <p class="kpi-value" id="total-work-hours" aria-live="polite">0</p>
+                            <p class="kpi-description">ساعة عمل</p>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card kpi-warning" role="article">
+                        <div class="kpi-icon" aria-hidden="true">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <h3 class="kpi-label">إجمالي الأيام منذ آخر حادث</h3>
+                            <p class="kpi-value" id="days-without-injury" aria-live="polite">0</p>
+                            <p class="kpi-description">يوم</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مؤشرات السلامة (Safety Metrics) -->
+                <div class="content-card mt-6">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-line ml-2"></i>
+                            مؤشرات السلامة المهنية (Safety Metrics)
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- LTI - Lost Time Injury -->
+                            <div class="bg-gradient-to-br from-red-50 to-red-100 border border-red-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-red-600 text-2xl">
+                                        <i class="fas fa-user-injured"></i>
+                                    </div>
+                                    <span class="text-xs font-semibold text-red-700 bg-red-200 px-2 py-1 rounded">LTI</span>
+                                </div>
+                                <h3 class="text-sm font-semibold text-gray-700 mb-1">Lost Time Injury</h3>
+                                <p class="text-2xl font-bold text-red-600" id="lti-value">0</p>
+                                <p class="text-xs text-gray-600 mt-1">إصابات فقدان وقت العمل</p>
+                            </div>
+
+                            <!-- TIR - Total Injury Rate -->
+                            <div class="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-orange-600 text-2xl">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                    <span class="text-xs font-semibold text-orange-700 bg-orange-200 px-2 py-1 rounded">TIR</span>
+                                </div>
+                                <h3 class="text-sm font-semibold text-gray-700 mb-1">Total Injury Rate</h3>
+                                <p class="text-2xl font-bold text-orange-600" id="tir-value">0</p>
+                                <p class="text-xs text-gray-600 mt-1">معدل الإصابات الإجمالي</p>
+                            </div>
+
+                            <!-- FA - Frequency Rate -->
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-blue-600 text-2xl">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </div>
+                                    <span class="text-xs font-semibold text-blue-700 bg-blue-200 px-2 py-1 rounded">FA</span>
+                                </div>
+                                <h3 class="text-sm font-semibold text-gray-700 mb-1">Frequency Rate</h3>
+                                <p class="text-2xl font-bold text-blue-600" id="fa-value">0.00</p>
+                                <p class="text-xs text-gray-600 mt-1">معدل التكرار (لكل مليون ساعة)</p>
+                            </div>
+
+                            <!-- TRIR - Total Recordable Injury Rate -->
+                            <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="text-purple-600 text-2xl">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </div>
+                                    <span class="text-xs font-semibold text-purple-700 bg-purple-200 px-2 py-1 rounded">TRIR</span>
+                                </div>
+                                <h3 class="text-sm font-semibold text-gray-700 mb-1">Total Recordable Injury Rate</h3>
+                                <p class="text-2xl font-bold text-purple-600" id="trir-value">0.00</p>
+                                <p class="text-xs text-gray-600 mt-1">معدل الإصابات القابلة للتسجيل</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-xs text-gray-600">
+                                <i class="fas fa-info-circle ml-1 text-blue-600"></i>
+                                <strong>ملاحظة:</strong> يتم حساب المؤشرات بناءً على عدد الحوادث المسجلة وإجمالي ساعات العمل. 
+                                يمكن تحديث إجمالي ساعات العمل من إعدادات النظام.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="content-grid">
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-clock ml-2"></i>
+                                الأنشطة الأخيرة
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-activities" class="activity-list">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                                    <p class="text-gray-500">لا توجد أنشطة حديثة</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="fas fa-chart-line ml-2"></i>
+                                الإحصائيات السريعة
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-label">حوادث هذا الأسبوع</span>
+                                    <span class="stat-value" id="week-incidents">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">تصاريح مفتوحة</span>
+                                    <span class="stat-value" id="open-ptw">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">تدريبات مكتملة</span>
+                                    <span class="stat-value" id="completed-training">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">أيام بدون حوادث</span>
+                                    <span class="stat-value" id="days-without-incident">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Employee Report Widget -->
+                    <div id="employee-report-widget" class="mt-6"></div>
+                    
+                    <!-- Reports Widget -->
+                    <div id="dashboard-reports-widget" class="mt-6"></div>
+                    
+                    <!-- Charts Section -->
+                    <div id="dashboard-charts" class="mt-6"></div>
+                </div>
+            </section>
+
+            <!-- Other Sections (will be added dynamically) -->
+            <section id="users-section" class="section" role="region" aria-label="قسم المستخدمين"></section>
+            <section id="employees-section" class="section" role="region" aria-label="قسم قاعدة بيانات الموظفين"></section>
+            <section id="incidents-section" class="section" role="region" aria-label="قسم الحوادث"></section>
+            <section id="nearmiss-section" class="section" role="region" aria-label="قسم الحوادث الوشيكة"></section>
+            <section id="ptw-section" class="section" role="region" aria-label="قسم تصاريح العمل"></section>
+            <section id="training-section" class="section" role="region" aria-label="قسم التدريب"></section>
+            <section id="clinic-section" class="section" role="region" aria-label="قسم العيادة الطبية"></section>
+            <section id="fire-equipment-section" class="section" role="region" aria-label="قسم فحص معدات الحريق"></section>
+            <section id="ppe-section" class="section" role="region" aria-label="قسم مهمات الوقاية الشخصية"></section>
+            <section id="violations-section" class="section" role="region" aria-label="قسم المخالفات"></section>
+            <section id="contractors-section" class="section" role="region" aria-label="قسم المقاولين"></section>
+            <section id="behavior-monitoring-section" class="section" role="region" aria-label="قسم مراقبة التصرفات"></section>
+            <section id="chemical-safety-section" class="section" role="region" aria-label="قسم المواد الكيميائية"></section>
+            <section id="daily-observations-section" class="section" role="region" aria-label="قسم الملاحظات اليومية"></section>
+            <section id="iso-section" class="section" role="region" aria-label="قسم نظام ISO"></section>
+            <section id="emergency-section" class="section" role="region" aria-label="قسم تنبيهات الطوارئ"></section>
+            <section id="risk-assessment-section" class="section" role="region" aria-label="قسم تقييم المخاطر"></section>
+            <section id="sop-jha-section" class="section" role="region" aria-label="قسم تعليمات السلامة SOP-JHA"></section>
+            <section id="legal-documents-section" class="section" role="region" aria-label="قسم المستندات القانونية"></section>
+            <section id="sustainability-section" class="section" role="region" aria-label="قسم الاستدامة البيئية"></section>
+            <section id="action-tracking-section" class="section" role="region" aria-label="قسم سجل متابعة الإجراءات"></section>
+            <section id="half-yearly-statistics-section" class="section" role="region" aria-label="قسم الاحصائيات النصف سنوية"></section>
+            <section id="ai-assistant-section" class="section" role="region" aria-label="قسم مساعد الذكاء الاصطناعي"></section>
+            <section id="settings-section" class="section" role="region" aria-label="قسم الإعدادات"></section>
+        </main>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            <p class="mt-4 text-gray-600">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js" defer></script>
+</body>
+</html>
